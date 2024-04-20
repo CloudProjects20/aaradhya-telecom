@@ -1,0 +1,34 @@
+{
+    "id": "result#unique-id",
+    "title": "",
+    "description": "The user has been successfully created.",
+    "otherdetails": {
+        "dates": [
+            {}
+        ],
+        "fees": [],
+        "vacencies": [
+            {}
+        ],
+        "eligibility": [
+            {
+                "key": "value" 
+            } 
+        ],
+        "ageLimit": [
+            {
+                "key": "value" 
+            } 
+        ],
+        "examPattern": [
+            {}
+        ],
+        "importantLinks": [
+            {}
+        ]
+    },
+    "createAt": "",
+    "updatedAt": "",
+    "createBy:": "",
+    "isActive": true
+}
