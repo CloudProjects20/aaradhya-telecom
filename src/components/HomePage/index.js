@@ -137,9 +137,9 @@ const TestimonialsCarausel = () => {
       <Carousel autoFocus autoPlay infiniteLoop showThumbs={false} showArrows={false} showIndicators={false} showStatus={false}>
         {testimonials.map((testimonial, index) => {
           return (
-            <div style={{ height: 150, alignSelf: "flex-start", borderBottomStyle: "groove", borderColor: "orange" }}>
+            <div style={{ height: 150, alignSelf: "flex-start", borderBottomStyle: "groove", borderColor: "#3f90a8" }}>
               <Space direction='vertical'>
-                <Avatar size={50}>{testimonial.name}</Avatar>
+                <Avatar size={50} style={{ backgroundColor: "#3f90a8", margin: "2px" }}>{testimonial.name}</Avatar>
                 <Text>{testimonial.comment}</Text>
                 <Rate disabled allowHalf defaultValue={testimonial.rating} />
               </Space>
@@ -212,19 +212,31 @@ const Features = () => {
   );
 }
 
+const ItemCarasoul = (props) => {
+  return (
+    <div className='row' style={{ paddingTop: 10 }}>
+      <Carousel autoFocus autoPlay infiniteLoop showThumbs={false} showArrows={false} showIndicators={false} showStatus={false} autoplaySpeed={3000}>
+        <div>
+          {props.services.map((service) => {
+            return <Avatar size={100} shape='circle' style={{ backgroundColor: "#3f90a8", margin: "2px" }}> {service}</Avatar>
+          })}
+        </div>
+        <div>
+          {props.services.map((service) => {
+            return <Avatar size={100} shape='circle' style={{ backgroundColor: "#3f90a8", margin: "2px" }}> {service}</Avatar>
+          })}
+        </div>
+      </Carousel>
+    </div>
+  )
+}
+
 const OnlineFormFillling = () => {
   return (
-    <div id="OnlineFormFillling" className="row" style={{ backgroundColor: "white" }}>
-      <Card >
-        <h1 >Online Form Filling Service</h1>
-        {/* <Carousel autoFocus autoPlay infiniteLoop showThumbs={false} showArrows={false} showIndicators={false} showStatus={false} autoplaySpeed={3000}>
-          <div>
-            <Avatar src={`/img/logos/ssc.jfif`} size={100} shape='circle'> IPBS</Avatar> &nbsp; 
-          </div>
-          <div>
-            <Avatar src={`/img/logos/ssc.jfif`} size={100} shape='circle'> IPBS</Avatar> &nbsp; 
-          </div>
-        </Carousel> */}
+    <div id="OnlineFormFillling" className="row" style={{ backgroundColor: "#3f90a8" }}>
+      <Card>
+        <h1>Online Form Filling Service</h1>
+        <ItemCarasoul services={["IBPS", 'SSC', 'CGL', 'SBI']} />
         <br />
         <p>At Aaradhya Telecom & Net Cafe, we understand the challenges and complexities students face when filling out online forms for various competitive examinations. That's why we offer expert assistance to streamline this process and alleviate the burden from your shoulders.</p>
 
@@ -256,9 +268,11 @@ const OnlineFormFillling = () => {
 
 const RailReservation = () => {
   return (
-    <div id="RailReservation" className="row" style={{ backgroundColor: "white" }}>
+    <div id="RailReservation" className="row" style={{ backgroundColor: "#3f90a8" }}>
       <Card >
         <h1>Rail Reservations</h1>
+
+        <ItemCarasoul services={["Tatkal", 'General']} /> <br />
 
         <p>Effortlessly book railway tickets online with the assistance of Aaradhya Telecom & Net Cafe. Say goodbye to long queues and tedious booking processes, and plan your travel conveniently with our expert help.</p>
 
@@ -286,9 +300,11 @@ const RailReservation = () => {
 
 const MoneyTransfer = () => {
   return (
-    <div id="MoneyTransfer" className="row" style={{ backgroundColor: "white" }}>
+    <div id="MoneyTransfer" className="row" style={{ backgroundColor: "#3f90a8" }}>
       <Card >
         <h1>Money Transfer</h1>
+
+        <ItemCarasoul services={["IMPS", 'Through Aadhar']} /><br />
 
         <p>Make hassle-free online payments securely with Aaradhya Telecom & Net Cafe. Whether you need to transfer money to friends and family, pay bills, or make purchases online, we've got you covered.</p>
 
@@ -305,7 +321,7 @@ const MoneyTransfer = () => {
         <ul>
           <li><strong>Security:</strong> Trust our secure platform to safeguard your financial transactions and protect your sensitive information.</li>
           <li><strong>Convenience:</strong> Enjoy the convenience of making hassle-free online payments anytime, anywhere, with just a few clicks.</li>
-          <li><strong>Reliability:</strong> Rely on our reliable service to ensure that your transactions are processed smoothly and efficiently.</li> 
+          <li><strong>Reliability:</strong> Rely on our reliable service to ensure that your transactions are processed smoothly and efficiently.</li>
         </ul>
       </Card>
     </div>
@@ -314,9 +330,11 @@ const MoneyTransfer = () => {
 
 const ElectricityMeterApplication = () => {
   return (
-    <div id="ElectricityMeterApplication" className="row" style={{ backgroundColor: "white" }}>
+    <div id="ElectricityMeterApplication" className="row" style={{ backgroundColor: "#3f90a8" }}>
       <Card >
         <h1>Electricity Meter Application</h1>
+
+        <ItemCarasoul services={["KESCO", 'UPPCL']} /><br />
 
         <p>Apply for electricity meter connections online smoothly with Aaradhya Telecom & Net Cafe. Whether you're moving into a new property or need to upgrade your existing meter, we're here to assist you through the entire application process.</p>
 
@@ -343,7 +361,7 @@ const ElectricityMeterApplication = () => {
 
 const ResumeCreation = () => {
   return (
-    <div id="ResumeCreation" className="row" style={{ backgroundColor: "white" }}>
+    <div id="ResumeCreation" className="row" style={{ backgroundColor: "#3f90a8" }}>
       <Card >
         <h1>Resume Creation</h1>
 
@@ -371,9 +389,9 @@ const ResumeCreation = () => {
 }
 const MoneyWithdrawal = () => {
   return (
-    <div id="MoneyWithdrawal" className="row" style={{ backgroundColor: "white" }}>
+    <div id="MoneyWithdrawal" className="row" style={{ backgroundColor: "#3f90a8" }}>
       <Card >
-        <h1>Money Withdrawal through Aadhar Authentication</h1>
+        <h1>Money Withdrawal through Aadhar</h1>
 
         <p>Withdraw money securely and conveniently using Aadhar authentication with Aaradhya Telecom & Net Cafe. Our Aadhar-enabled payment system allows you to access your funds easily without the need for physical bank cards or documents.</p>
 
@@ -400,10 +418,12 @@ const MoneyWithdrawal = () => {
 
 const SecurePayments = () => {
   return (
-    <div id="SecurePayments" className="row" style={{ backgroundColor: "white" }}>
+    <div id="SecurePayments" className="row" style={{ backgroundColor: "#3f90a8" }}>
       <Card >
         <h1>Secure Online Payments</h1>
 
+        <ItemCarasoul services={['Mobile', "Landline", 'Piped Gas', 'Water Tax', 'BroadBand', 'Insurance', 'Cable TV', 'Credit Card', 'Fastag']} />
+        <br />
         <p>Make hassle-free online payments securely with Aaradhya Telecom & Net Cafe. We understand the importance of security when it comes to online transactions, and we prioritize the safety and protection of your financial information.</p>
 
         <h2>Safe and Protected Transactions</h2>
@@ -419,7 +439,7 @@ const SecurePayments = () => {
         <ul>
           <li><strong>Security:</strong> Trust our secure platform to safeguard your financial transactions and protect your sensitive information.</li>
           <li><strong>Convenience:</strong> Enjoy the convenience of making hassle-free online payments anytime, anywhere, with just a few clicks.</li>
-          <li><strong>Reliability:</strong> Rely on our reliable service to ensure that your transactions are processed smoothly and efficiently.</li> 
+          <li><strong>Reliability:</strong> Rely on our reliable service to ensure that your transactions are processed smoothly and efficiently.</li>
         </ul>
       </Card>
     </div>
@@ -427,7 +447,7 @@ const SecurePayments = () => {
 }
 const NetSurfing = () => {
   return (
-    <div id="NetSurfing" className="row" style={{ backgroundColor: "white" }}>
+    <div id="NetSurfing" className="row" style={{ backgroundColor: "#3f90a8" }}>
       <Card >
         <h1>Net Surfing</h1>
 
@@ -456,10 +476,10 @@ const NetSurfing = () => {
 
 const Onlinerecharges = () => {
   return (
-    <div id="Onlinerecharges" className="row" style={{ backgroundColor: "white" }}>
+    <div id="Onlinerecharges" className="row" style={{ backgroundColor: "#3f90a8" }}>
       <Card >
         <h1>Online Recharges</h1>
-
+        <ItemCarasoul services={['Jio', "Airtel", 'Vi', 'Jio Fiber', 'Dish TV', 'Tata Sky', '']} />
         <p>Top up your mobile phone or other services online without any hassle with Aaradhya Telecom & Net Cafe. Stay connected wherever you go with our convenient online recharge services.</p>
 
         <h2>Hassle-Free Recharges</h2>
@@ -485,7 +505,7 @@ const Onlinerecharges = () => {
 
 const AboutUs = () => {
   return (
-    <div id="about" className="row" style={{ backgroundColor: "white" }}>
+    <div id="about" className="row" style={{ backgroundColor: "#3f90a8" }}>
       <Card >
         <h1>About Us</h1>
         <p>Welcome to Aaradhya Telecom & NetCafe, <br />  <br />
@@ -512,46 +532,46 @@ export default function HomepageFeatures() {
       <div className="container">
         <div style={{ padding: 1 }}>
           <div className='row'>
-            {/* <ImagesCarousel /> */} 
+            {/* <ImagesCarousel /> */}
           </div>
-          <div className="row" style={{ paddingTop: 5, alignContent: "center", alignSelf: "center", borderRadius: 4 }}>
+          <div className="row" style={{ paddingTop: 0, alignContent: "center", alignSelf: "center", borderRadius: 4 }}>
             <Features />
           </div>
-          <div className="row" style={{ paddingTop: 5, alignContent: "center", alignSelf: "center", borderRadius: 4 }}>
+          <div className="row" style={{ paddingTop: 0, alignContent: "center", alignSelf: "center", borderRadius: 4 }}>
             <OnlineFormFillling />
           </div>
-          <div className="row" style={{ paddingTop: 5, alignContent: "center", alignSelf: "center", borderRadius: 4 }}>
+          <div className="row" style={{ paddingTop: 0, alignContent: "center", alignSelf: "center", borderRadius: 4 }}>
             <RailReservation />
           </div>
-          <div className="row" style={{ paddingTop: 5, alignContent: "center", alignSelf: "center", borderRadius: 4 }}>
+          <div className="row" style={{ paddingTop: 0, alignContent: "center", alignSelf: "center", borderRadius: 4 }}>
             <ResumeCreation />
           </div>
-          <div className="row" style={{ paddingTop: 5, alignContent: "center", alignSelf: "center", borderRadius: 4 }}>
+          <div className="row" style={{ paddingTop: 0, alignContent: "center", alignSelf: "center", borderRadius: 4 }}>
             <ElectricityMeterApplication />
           </div>
-          <div className="row" style={{ paddingTop: 5, alignContent: "center", alignSelf: "center", borderRadius: 4 }}>
+          <div className="row" style={{ paddingTop: 0, alignContent: "center", alignSelf: "center", borderRadius: 4 }}>
             <SecurePayments />
           </div>
-          <div className="row" style={{ paddingTop: 5, alignContent: "center", alignSelf: "center", borderRadius: 4 }}>
+          <div className="row" style={{ paddingTop: 0, alignContent: "center", alignSelf: "center", borderRadius: 4 }}>
             <NetSurfing />
           </div>
-          <div className="row" style={{ paddingTop: 5, alignContent: "center", alignSelf: "center", borderRadius: 4 }}>
+          <div className="row" style={{ paddingTop: 0, alignContent: "center", alignSelf: "center", borderRadius: 4 }}>
             <MoneyWithdrawal />
           </div>
-          <div className="row" style={{ paddingTop: 5, alignContent: "center", alignSelf: "center", borderRadius: 4 }}>
+          <div className="row" style={{ paddingTop: 0, alignContent: "center", alignSelf: "center", borderRadius: 4 }}>
             <MoneyTransfer />
           </div>
-          <div className="row" style={{ paddingTop: 5, alignContent: "center", alignSelf: "center", borderRadius: 4 }}>
+          <div className="row" style={{ paddingTop: 0, alignContent: "center", alignSelf: "center", borderRadius: 4 }}>
             <Onlinerecharges />
           </div>
-          <div className="row" style={{ paddingTop: 5, alignContent: "center", alignSelf: "center", borderRadius: 10 }}>
+          <div className="row" style={{ paddingTop: 0, alignContent: "center", alignSelf: "center", borderRadius: 10 }}>
             <AboutUs />
           </div>
           {/* <div className="row" style={{ paddingTop: 5, alignContent: "center", alignSelf: "center", borderRadius: 10 }}>
             <ContactUs />
           </div> */}
 
-          <div className='row' style={{ paddingTop: 5, alignContent: "center", alignSelf: "center" }}>
+          <div className='row' style={{ paddingTop: 0, alignContent: "center", alignSelf: "center", borderRadius: 10  }}>
             {/* <h2 style={{ textAlign: "center", alignSelf: "center" }}>Customer Reviews</h2> */}
             <TestimonialsCarausel />
           </div>
