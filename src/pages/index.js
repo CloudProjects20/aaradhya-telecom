@@ -3,13 +3,15 @@ import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
 import HomePage from '@site/src/components/HomePage';
-import { FloatButton } from 'antd';
+import { FloatButton } from 'antd'; 
 
+import { useHistory } from '@docusaurus/router';
 import Heading from '@theme/Heading';
 import styles from './index.module.css';
 
 function HomepageHeader() {
   const { siteConfig } = useDocusaurusContext();
+  const history = useHistory(); 
   return (
     <header className={clsx('hero hero--primary', styles.heroBanner)}>
       <div className="container">
@@ -26,16 +28,14 @@ function HomepageHeader() {
   );
 }
 
-
 export default function Home() {
   const { siteConfig } = useDocusaurusContext();
   return (
-    <Layout title={siteConfig.title} description="Description will go into a meta tag in <head />">
-      <main style={{ backgroundColor: "#F0F5F7" }}>
-        <HomepageHeader />
-        <HomePage />
-        {/* <FloatButton tooltip="Chat with Us" onClick={() => console.log('onClick')} style={{ backgroundColor: "green" }} />; */}
-      </main>
-    </Layout>
+      <Layout title={siteConfig.title} description="Description will go into a meta tag in <head />">
+        <main style={{ backgroundColor: "#F0F5F7" }}>
+          <HomepageHeader />
+          <HomePage />
+        </main>
+      </Layout>
   );
 }

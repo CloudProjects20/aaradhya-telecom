@@ -116,6 +116,7 @@ const config = {
           //   position: 'right',
           //   label: 'Students Corner',
           // },
+          { to: '/jobReady', label: 'Job Ready Admin', position: 'left' },
           // { to: '/featured', label: 'Featured Content', position: 'left' },
           // { to: '/testimonials', label: 'Testimonials', position: 'left' },
           // { to: '/announcements', label: 'News & Announcements', position: 'left' },
