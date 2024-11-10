@@ -2,8 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { withTheme } from '@rjsf/core';
 import { ArrayFieldTemplateItemType, RJSFSchema, UiSchema } from '@rjsf/utils';
 import validator from '@rjsf/validator-ajv8';
+import { Tabs, Button } from 'antd';
 import { Theme as AntDTheme } from '@rjsf/antd';
-// Make modifications to the theme with your own fields and widgets
+import { firestore } from '../../firebase';
+import { collection, doc, onSnapshot, addDoc, query, where, getDocs, limit, orderBy, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
+
+const { TabPane } = Tabs;
 const Form = withTheme(AntDTheme);
 
 const mapDropdownData = (data) => {
@@ -17,17 +21,16 @@ const schema = {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "type": "object",
     "properties": {
-        "organizations": {
+        "organizationId": {
             "type": "string",
             "title": "Organization",
-            "enum": ["RRB","SSC"]
-            // "enum": mapDropdownData(organizations).map(option => option.value), // Store ID
-            // "enumNames": mapDropdownData(zoneData).map(option => option.label) // Display name
+            "default": "",
+            "enabled": false
         },
-        "categories": {
+        "categoryId": {
             "type": "string",
-            "title": "Categories",
-            "enum": []  // Enum will be populated dynamically
+            "title": "Category",
+            "default": ""
         },
         "notificationNumber": {
             "type": "string",
@@ -200,6 +203,7 @@ const schema = {
                     },
                     "categories": {
                         "type": "array",
+                        "title": "Category",
                         "items": {
                             "type": "object",
                             "properties": {
@@ -215,13 +219,10 @@ const schema = {
                                     "type": "string",
                                     "description": "The title of the category (if applicable)."
                                 }
-                            },
-                            "required": ["category", "noOfOpening"]
-                        },
-                        "description": "The breakdown of openings by category."
+                            }
+                        }
                     }
-                },
-                "required": ["zone", "totalOpenings", "categories"]
+                }
             }
         }
     },
@@ -231,13 +232,161 @@ const schema = {
         "title",
         "postDate",
         "shortInformation",
-        "totalPosts",
         "importantDates",
         "applicationFee",
         "ageLimit",
-        "eligibility",
-        "vacancies"
+        "eligibility"
     ]
+};
+
+
+// // Custom ArrayFieldTemplate using Ant Design Tabs
+// const MyArrayFieldTemplate = (props) => {
+//     const [activeKey, setActiveKey] = useState('0');
+//     const [items, setItems] = useState(defaultPanes);
+//     const onTabChange = (key) => {
+//         setActiveKey(key);
+//     };
+
+//     const onEdit = (targetKey, action) => {
+//         if (action === 'add') {
+//             //tabItems();
+//         } else {
+//             remove(targetKey);
+//         }
+//     };
+
+//     const remove = (targetKey) => {
+//         let newActiveKey = activeKey;
+//         let lastIndex = -1;
+//         items.forEach((item, i) => {
+//             if (item.key === targetKey) {
+//                 lastIndex = i - 1;
+//             }
+//         });
+//         const newPanes = items.filter((item) => item.key !== targetKey);
+//         if (newPanes.length && newActiveKey === targetKey) {
+//             if (lastIndex >= 0) {
+//                 newActiveKey = newPanes[lastIndex].key;
+//             } else {
+//                 newActiveKey = newPanes[0].key;
+//             }
+//         }
+//         setActiveKey(newActiveKey);
+//     };
+
+//     const tabItems = props.items.map((item, index) => ({
+//         label: `${props.schema.title} ${index + 1}`,
+//         key: index,
+//         children: (
+//             <div key={item.key} style={{ marginBottom: '16px' }}>
+//                 {item.children}
+//             </div>
+//         ),
+//     }));
+//     return (
+//         <div style={{ marginBottom: '16px' }}>
+//             <Button
+//                 type="primary"
+//                 onClick={() => props.onAddClick()}
+//             >
+//                 {`Add New ${props.schema.title}`}
+//             </Button>
+//             <Tabs            
+//                 type="editable-card"
+//                 activeKey={activeKey}
+//                 onChange={onTabChange}
+//                 onEdit={onEdit}
+//                 items={tabItems} />
+//         </div>
+//     );
+// };
+
+const MyArrayFieldTemplate = (props) => {
+    const [activeKey, setActiveKey] = useState('0');  // default active tab key
+    const [items, setItems] = useState(
+        props.items.map((item, index) => ({
+            label: `${props.schema.title} ${index + 1}`,
+            key: index.toString(),
+            children: (
+                <div key={item.key} style={{ marginBottom: '16px' }}>
+                    {item.children}
+                </div>
+            ),
+        }))
+    );
+
+    const onTabChange = (key) => {
+        setActiveKey(key);
+    };
+
+    const onEdit = (targetKey, action) => {
+        if (action === 'add') {
+            addTab();
+        } else {
+            removeTab(targetKey);
+        }
+    };
+
+    const addTab = () => {
+        const newIndex = items.length;
+        const newTab = {
+            label: `${props.schema.title} ${newIndex + 1}`,
+            key: newIndex.toString(),
+            children: (
+                <div key={newIndex} style={{ marginBottom: '16px' }}>
+                    {props.onAddClick()} {/* Calls the onAddClick function to create new item */}
+                </div>
+            ),
+        };
+        const tabItems = props.items.map((item, index) => ({
+            label: `${props.schema.title} ${index + 1}`,
+            key: index,
+            children: (
+                <div key={item.key} style={{ marginBottom: '16px' }}>
+                    {item.children}
+                </div>
+            ),
+        }));
+        setItems([...items, newTab]);
+        setActiveKey(newTab.key);
+    };
+
+    const removeTab = (targetKey) => {
+        let newActiveKey = activeKey;
+        let lastIndex = -1;
+        items.forEach((item, i) => {
+            if (item.key === targetKey) {
+                lastIndex = i - 1;
+            }
+        });
+
+        const newPanes = items.filter((item) => item.key !== targetKey);
+        if (newPanes.length && newActiveKey === targetKey) {
+            if (lastIndex >= 0) {
+                newActiveKey = newPanes[lastIndex].key;
+            } else {
+                newActiveKey = newPanes[0].key;
+            }
+        }
+        setItems(newPanes);
+        setActiveKey(newActiveKey);
+    };
+
+    return (
+        <div style={{ marginBottom: '16px' }}>
+            <Button type="primary" onClick={addTab}>
+                {`Add New ${props.schema.title}`}
+            </Button>
+            <Tabs
+                type="editable-card"
+                activeKey={activeKey}
+                onChange={onTabChange}
+                onEdit={onEdit}
+                items={items}
+            />
+        </div>
+    );
 };
 
 const uiSchema = {
@@ -251,13 +400,22 @@ const uiSchema = {
     },
     "shortInformation": {
         "ui:widget": "textarea",
-    }
+    },
+    'ui:ArrayFieldTemplate': MyArrayFieldTemplate,
+    "arrayField": {
+        "ui:options": {
+            addable: true,
+            orderable: true,
+            removable: true,
+        },
+    },
 };
 
-function ArrayFieldItemTemplate(props) {
-    const { children, className } = props;
-    return <div style={{ paddingLeft: 10, marginLeft: 10 }}>{children}</div>;
-}
+// function ArrayFieldItemTemplate(props) {
+//     const { children, className } = props;
+//     return <div style={{ paddingLeft: 10, marginLeft: 10 }}>{children}</div>;
+// }
+
 
 const log = (type) => console.log.bind(console, type);
 
@@ -273,12 +431,10 @@ const CustomTitleField = ({ title, required }) => {
 const customFields = { TitleField: CustomTitleField };
 // const customWidgets = { CheckboxWidget: CustomCheckbox };
 
-const onSubmit = ({ formData }, e) => {
-    console.log('Data submitted: ', formData)
-}
+
 
 const AddnewJobPosting = (props) => {
-    const { organizations, categories } = props
+    const { organizationId, categoryId, onFormSubmit } = props
     const [formSchema, setFormSchema] = useState(schema);
 
     useEffect(() => {
@@ -288,13 +444,13 @@ const AddnewJobPosting = (props) => {
                 ...prevSchema,
                 properties: {
                     ...prevSchema.properties,
-                    organizations: {
-                        ...prevSchema.properties.organizations,
-                        enum: organizations
+                    organizationId: {
+                        ...prevSchema.properties.organizationId,
+                        default: organizationId
                     },
-                    categories: {
-                        ...prevSchema.properties.categories,
-                        enum: categories
+                    categoryId: {
+                        ...prevSchema.properties.categoryId,
+                        default: categoryId
                     }
                 }
             }));
@@ -307,8 +463,9 @@ const AddnewJobPosting = (props) => {
             schema={formSchema}
             uiSchema={uiSchema}
             validator={validator}
+            templates={{ ArrayFieldTemplate: MyArrayFieldTemplate }}
             onChange={log('changed')}
-            onSubmit={onSubmit}
+            onSubmit={onFormSubmit}
             onError={log('errors')}
             name='Add New Post'
             fields={customFields}

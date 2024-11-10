@@ -9,6 +9,7 @@ import DynamicScreen from '../../screens/DynamicScreen'
 
 
 const App = () => {
+    const [size, setSize] = useState('small');
     const [organizations, setOrganizations] = useState([]);
     const [categories, setCategories] = useState([]);
     const [notifications, setNotifications] = useState([]);
@@ -20,10 +21,6 @@ const App = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [open, setOpen] = useState(false);
-
-    // const [form] = Form.useForm();
-    // const [formLayout, setFormLayout] = useState('horizontal');
-    // const formItemLayout = formLayout === 'horizontal' ? { labelCol: { span: 6 }, wrapperCol: { span: 14 } } : null;
 
     const showModal = () => {
         setOpen(true);
@@ -47,9 +44,9 @@ const App = () => {
     // const handleCancel = () => {
     //     setOpen(false);
     // };
-    const onChange = (date, dateString) => {
-        console.log(date, dateString);
-    };
+    // const onChange = (date, dateString) => {
+    //     console.log(date, dateString);
+    // };
 
     const [form] = Form.useForm();
     const [formLayout, setFormLayout] = useState('horizontal');
@@ -87,21 +84,15 @@ const App = () => {
                         await organizationService.getCategoriesByOrgId(org.id, (async (orgCategories) => {
                             allCategories = [...allCategories, ...orgCategories];
                             for (const category of orgCategories) {
-                                await organizationService.getNotifications(org.id, category.id, async (notifications) => {
-                                    console.log(notifications)
-                                    for (const notification of notifications) {
-                                        await organizationService.getJobPosts(org.id, category.id, notification.id, async (jobPosts) => {
-                                            console.log(jobPosts)
-                                            console.log('-------------')
-                                            allJobPosts = [...allJobPosts, ...jobPosts];
-                                            setJobPosts(allJobPosts)
-                                        });
-                                    }
+
+                                await organizationService.getJobPosts(org.id, category.id, async (jobPosts) => {
+                                    console.log(jobPosts)
+                                    console.log('-------------')
+                                    allJobPosts = [...allJobPosts, ...jobPosts];
+                                    setJobPosts(allJobPosts)
                                 });
                             }
-                        })); // Ensure org.id matches your document ID
-
-
+                        }));
                     }
 
                     // // Sort jobPosts by createdAt in descending order
@@ -124,12 +115,12 @@ const App = () => {
         };
 
         fetchOrganizations();
-    }, [selectedOrganization]);
+    }, []);
 
     const handleOrganizationSelect = async (orgId) => {
         setSelectedOrganization(orgId);
         setCategories([]); // Reset categories when a new organization is selected
-
+        setSelectedCategory(null); // Reset the selected category as well
         try {
             console.log(`Selected Organization ID: ${orgId}`);
 
@@ -147,31 +138,6 @@ const App = () => {
     // Fetch notifications when a category is selected
     const handleCategorySelect = async (categoryId) => {
         setSelectedCategory(categoryId);
-        setNotifications([]); // Reset notifications
-
-        try {
-            await organizationService.getNotifications(selectedOrganization, categoryId, (notifs) => {
-                setNotifications(notifs);
-            });
-        } catch (err) {
-            console.error(`Error fetching notifications: ${err.message}`);
-        }
-    };
-
-    // Fetch notifications when a category is selected
-    const handleNotificationSelect = async (notificationId) => {
-        console.log('notificationId', notificationId)
-        setSelectedNotification(notificationId);
-        //setNotifications([]); // Reset notifications
-
-        try {
-            await organizationService.getJobPosts(selectedOrganization, selectedCategory, notificationId, (jobPosts) => {
-                console.log(jobPosts)
-                setJobPosts(jobPosts);
-            });
-        } catch (err) {
-            console.error(`Error fetching notifications: ${err.message}`);
-        }
     };
 
     const columns = [
@@ -210,7 +176,7 @@ const App = () => {
             {categories.length > 0 ? (
                 categories.map((cat) => (
                     <Menu.Item key={cat.id}>
-                        {cat.categoryName}
+                        <b>{cat.categoryAka}</b> - {cat.categoryName}
                     </Menu.Item>
                 ))
             ) : (
@@ -219,34 +185,73 @@ const App = () => {
         </Menu>
     );
 
-    const notificationMenu = (
-        <Menu onClick={({ key }) => handleNotificationSelect(key)}>
-            {notifications.length > 0 ? (
-                notifications.map((notif) => (
-                    <Menu.Item key={notif.id}>
-                        {notif.notificationNumber}
-                    </Menu.Item>
-                ))
-            ) : (
-                <Menu.Item key="no-notif">No notifications available</Menu.Item>
-            )}
-        </Menu>
-    );
+    const onFormSubmit = async ({ formData }, e) => {
+        console.log('Data submitted: ', formData)
+        await organizationService.createJobPost(formData);
+    }
 
     return (
         <Layout title="Services" description="Description will go into a meta tag in <head />">
-            <Row justify="start">
-                {/* <Button type="dashed">Add New Organization</Button>
-                <Button type="dashed">Add New Category</Button>
-                <Button type="dashed">Add New Notification</Button> */}
-                <Button type="primary" style={{ margin: 8 }} onClick={() => showModal(true)}>Add New Job Post</Button>
-                <Button type="primary" style={{ margin: 8 }} onClick={() => showModal(true)}>Add New Result Info</Button>
-                <Button type="primary" style={{ margin: 8 }} onClick={() => showModal(true)}>Add new Admit Card Info</Button>
-            </Row>
-            <Row>
-                <Table dataSource={jobPosts} columns={columns} />
-            </Row>
-            {/* <DynamicScreen /> */}
+            <div style={{ margin: 10 }}>
+                <Tabs
+                    tabPosition='left   '
+                    defaultActiveKey="1"
+                    type="card"
+                    size={size}
+                    items={[{
+                        label: `Latest Jobs`,
+                        key: 'latestJobs',
+                        children: <div>
+                            <Row>
+                                <Col style={{ padding: 8 }}>
+                                    <Form.Item label="Organization" name="notificationNumber" rules={[{ required: true, message: 'Please select the Organization !' }]}>
+                                        <Dropdown overlay={organizationMenu} disabled={loading}>
+                                            <a onClick={(e) => e.preventDefault()}>
+                                                <Space>
+                                                    {selectedOrganization ? organizations.find(org => org.id === selectedOrganization)?.organizationName : 'Select Organization'}
+                                                    <DownOutlined />
+                                                </Space>
+                                            </a>
+                                        </Dropdown>
+                                    </Form.Item>
+                                </Col>
+                                <br />
+                                <br />
+                                <Col style={{ padding: 8 }}>
+                                    <Form.Item label="Category" name="notificationNumber" rules={[{ required: true, message: 'Please select the Organization !' }]}>
+                                        <Dropdown overlay={categoryMenu} disabled={!selectedOrganization || categories.length === 0}>
+                                            <a onClick={(e) => e.preventDefault()}>
+                                                <Space>
+                                                    {selectedCategory ? categories.find(cat => cat.id === selectedCategory)?.categoryName : 'Select Category'}
+                                                    <DownOutlined />
+                                                </Space>
+                                            </a>
+                                        </Dropdown>
+                                    </Form.Item>
+                                </Col>
+                                <br />
+                                <br />
+                                <Col>
+                                    <Button type="primary" style={{ margin: 8, }} onClick={() => showModal(true)}>Add New Job Post</Button>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Table dataSource={jobPosts} columns={columns} />
+                            </Row>
+                        </div>,
+                    },
+                    {
+                        label: `Results`,
+                        key: 'results',
+                        children: `Content of card tab`,
+                    },
+                    {
+                        label: `Admit Cards`,
+                        key: 'admitCards',
+                        children: `Content of card tab`,
+                    }]}
+                />
+            </div>
             <Row>
                 <Modal
                     open={open}
@@ -265,7 +270,7 @@ const App = () => {
                     footer={null}
                 >
                     {/* <AddNewJobPost /> */}
-                    <DynamicScreen organizations={organizations} categories={categories} />
+                    <DynamicScreen organizationId={selectedOrganization} categoryId={selectedCategory} onFormSubmit={onFormSubmit} />
                 </Modal>
             </Row>
         </Layout >

@@ -1,4 +1,4 @@
-import { collection, doc, onSnapshot, addDoc, query, where, getDocs } from 'firebase/firestore';
+import { collection, doc, onSnapshot, addDoc, query, where, getDocs, getDoc , FieldValue, setDoc  } from 'firebase/firestore';
 import { firestore } from '../../firebase';
 
 class OrganizationService {
@@ -130,7 +130,38 @@ class OrganizationService {
 
 
     // Fetch all Job Posts for a specific Category within an Organization
-    async getJobPosts(organizationId, categoryId, notificationId, callback) {
+    async getJobPosts(organizationId, categoryId, callback) {
+        try {
+            console.log(organizationId, categoryId)
+            this.loading = true;
+            const queryRef = collection(firestore, `${this.collectionName}/${organizationId}/Categories/${categoryId}/Posts`);
+
+            const unsubscribe = onSnapshot(
+                queryRef,
+                (snapshot) => {
+                    this.jobPosts = snapshot.docs.map((doc) => ({
+                        id: doc.id,
+                        ...doc.data(),
+                        organizationId,
+                        categoryId
+                    }));
+                    console.log('Job posts fetched from Firestore:', this.jobPosts);
+                    this.loading = false
+                    callback(this.jobPosts)
+                },
+                (err) => {
+                    this.error = `Error fetching job posts: ${err.message}`;
+                }
+            );
+
+            this.loading = false;
+            return unsubscribe;
+        } catch (err) {
+            this.error = `Error fetching job posts: ${err.message}`;
+            this.loading = false;
+        }
+    }
+    async getJobPostsByNotificationId(organizationId, categoryId, notificationId, callback) {
         try {
             console.log(organizationId, categoryId, notificationId)
             this.loading = true;
@@ -195,25 +226,56 @@ class OrganizationService {
         }
     }
 
-    // Bookmark a Job Post
-    async bookmarkPost(job, userId) {
+    // Bookmark a specific Job Post
+    async createJobPost(formData) {
         try {
-            const queryRef = collection(firestore, `${this.collectionName}/${job.organization.id}/Categories/${job.category.id}/Posts/${job.id}/bookmarks`);
-
-            const q = query(queryRef, where('userId', '==', userId));
-            const querySnapshot = await getDocs(q);
-
-            if (!querySnapshot.empty) {
-                this.error = `Duplicate bookmark found for userId = ${userId}`;
-                return null;
+            const { organizationId, categoryId, title, notificationNumber, notificationDate, postDate, shortInformation, importantDates, applicationFee, eligibility, vacancies } = formData;
+    
+            // Check for required fields
+            if (!organizationId || !categoryId || !title || !notificationNumber) {
+                throw new Error('Missing required fields');
             }
-
-            const docRef = await addDoc(queryRef, { userId, timestamp: new Date() });
-            return docRef.id;
+    
+            // Generate document ID from title
+            const jobPostId = this.generateDocId(title);
+    
+            // Reference to the job post document
+            const postRef = doc(firestore, 'Organizations', organizationId, 'Categories', categoryId, 'Posts', jobPostId);
+    
+            // Check if the job post already exists
+            const docSnapshot = await getDoc(postRef);
+            if (docSnapshot.exists()) {
+                throw new Error('Job Post already exists');
+            }
+    
+            // Add the new job post
+            await setDoc(postRef, {
+                notificationNumber,
+                notificationDate,
+                title,
+                postDate,
+                shortInformation,
+                importantDates,
+                applicationFee: applicationFee || [],
+                eligibility: eligibility || [],
+                vacancies: vacancies || [],
+                createdAt: new Date().toISOString(),
+            });
+    
+            return jobPostId;
         } catch (err) {
-            this.error = `Error bookmarking job post: ${err.message}`;
+            this.error = `Error adding post: ${err.message}`;
+            console.error(err);
+            throw err;
         }
     }
+
+    
+    generateDocId(field) {
+        return field.replace(/\s+/g, '_').toLowerCase();
+    };
+
+
 }
 
 export default OrganizationService;
